@@ -1,4 +1,21 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+"""
+Copyright (C) 2009 - 2012 Luke Bryan
+              2011 - 2012 Rogério Theodoro de Brito
+              and other contributors.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+"""
 
 import logging
 import sys
@@ -94,7 +111,7 @@ class TestParser(unittest.TestCase):
 				 'iTunes U > Fort Hays State University > '
 				 'FHSU News > From the President - '
 				 'President Hammond')
-		self.assertEqual(len(parsed_html.mediaItems), 28)
+		self.assertEqual(len(parsed_html.mediaItems), 30)
 		# FIXME: The following should be made into proper tests
 		for line in parsed_html.mediaItems:
 			logging.debug(line)
@@ -137,10 +154,11 @@ class TestParser(unittest.TestCase):
 
 		self.assertEqual(parsed_html.Redirect, '')
 		self.assertEqual(parsed_html.Title,
-				 'iTunes U > George Fox University > Chapel - Chapel 2011-2012')
+				 'iTunes U > George Fox University > Chapel - Chapel 2012 - 2013')
 		# FIXME: Are all tabs shown?
 		self.assertEqual(parsed_html.tabMatches,
-				 [', Selected. Chapel 2011-2012',
+				 [', Selected. Chapel 2012 - 2013',
+				  '. Chapel 2011-2012',
 				  '. Shalom 2011-2012',
 				  '. Chapel 2010-2011',
 				  '. Shalom 2010-2011',

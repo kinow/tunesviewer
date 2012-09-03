@@ -1,5 +1,23 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Download window class.
+
+ Copyright (C) 2009 - 2012 Luke Bryan
+               2011 - 2012 Rogério Theodoro de Brito
+               and other contributors.
+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+"""
 import logging
-import os
 
 import gobject
 import gio
@@ -137,9 +155,9 @@ class DownloadBox:
 			# instead of updating every kb or mb, update regularly.
 			# This should work well no matter what the download speed is.
 			logging.debug("STARTING TIMEOUT")
-			#Only update the progress bar only about 4x a second,
-			#this won't make cpu work too much.
-			gobject.timeout_add(250, self.updateLoop)
+			# Only update the progress bar about once a second,
+			# to lower the CPU load.
+			gobject.timeout_add(1000, self.updateLoop)
 		d.start()
 		f = open(constants.DATA_FILE, 'a')
 		f.write("#### url and localfile name: ####\n" + url + "\n" + localfile + "\n")

@@ -1,3 +1,22 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Configuration window for Tunesviewer.
+
+ Copyright (C) 2009 - 2012 Luke Bryan
+               2011 - 2012 Rogério Theodoro de Brito
+               and other contributors.
+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+"""
 import ConfigParser
 import logging
 import os
@@ -19,16 +38,17 @@ class ConfigBox:
 	throbber = False
 	downloadfile = "%p/%n %l%t"
 	openers = {
-		".mp3" : DEFAULT_OPENER,
-		".m4a" : DEFAULT_OPENER,
-		".mov" : DEFAULT_OPENER,
-		".mp4" : DEFAULT_OPENER,
-		".m4v" : DEFAULT_OPENER,
-		".m4p" : DEFAULT_OPENER,
-		".aiff" : DEFAULT_OPENER,
-		".aif" : DEFAULT_OPENER,
-		".aifc" : DEFAULT_OPENER,
-		".3gp" : DEFAULT_OPENER,
+		".3gp": DEFAULT_OPENER,
+		".aif": DEFAULT_OPENER,
+		".aifc": DEFAULT_OPENER,
+		".aiff": DEFAULT_OPENER,
+		".m4a": DEFAULT_OPENER,
+		".m4p": DEFAULT_OPENER,
+		".m4v": DEFAULT_OPENER,
+		".mov": DEFAULT_OPENER,
+		".mp3": DEFAULT_OPENER,
+		".mp4": DEFAULT_OPENER,
+		".pdf": "xdg-open",
 		}
 	podcastprog = "rhythmbox %i"
 	defaultcommand = 2

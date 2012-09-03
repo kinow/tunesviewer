@@ -1,5 +1,21 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Common functions for Tunesviewer.
+
+ Copyright (C) 2009 - 2012 Luke Bryan
+               2011 - 2012 Rogério Theodoro de Brito
+               and other contributors.
+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 """
 import logging
 import os.path
@@ -75,8 +91,8 @@ def safeFilename(name, dos):
 	http://msdn.microsoft.com/en-us/library/ms810456.aspx
 	"""
 	if dos:
-		unsafe_fat_chars = r'[^-a-zA-Z0-9 $%`_@{}~!#().]'
-
+		unsafe_fat_chars = r'[^-a-zA-Z0-9 $%`_@{}~!#().,;]'
+		name = name.replace(":",";")
 		name = os.path.basename(name)
 		name = re.sub(unsafe_fat_chars, '', name)
 		(root, ext) = os.path.splitext(name)
@@ -173,4 +189,6 @@ def type_of(url):
 		ext = ext[ext.rfind("."):]
 	if ext.find("/") != -1:
 		ext = ext[:ext.find("/")]
+	if ext==".rtf": #wrong extension in url
+		ext = ".zip"
 	return ext

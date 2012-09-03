@@ -1,20 +1,23 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
 TunesViewer
-
 A small, easy-to-use tool to access iTunesU and podcast media.
 
-Designed by Luke Bryan 2009 - 2012
-Loading-icon is from mozilla's throbber icon.
+ Copyright (C) 2009 - 2012 Luke Bryan
+               2011 - 2012 Rogério Theodoro de Brito
+               and other contributors.
 
-Licensed under Apache license
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
-License for the specific language governing permissions and limitations
-under the License.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 """
 
 # Import standard Python modules
@@ -36,7 +39,6 @@ import glib
 import gobject
 import gtk
 import pango
-import pygtk
 
 gobject.threads_init()
 
@@ -52,7 +54,7 @@ from webkitview import WebKitView
 from Parser import Parser
 from SingleWindowSocket import SingleWindowSocket
 from common import *
-from constants import TV_VERSION, SEARCH_U, SEARCH_P, USER_AGENT
+from constants import TV_VERSION, SEARCH_U, SEARCH_P, USER_AGENT, HELP_URL, BUG_URL
 
 class TunesViewer:
 	source = ""  # full html/xml source
@@ -760,7 +762,7 @@ class TunesViewer:
 
 	def progUpdate(self, obj):
 		"""Checks for update to the program."""
-		openDefault("http://tunesviewer.sourceforge.net/checkversion.php?version=1.4")
+		openDefault("http://tunesviewer.sourceforge.net/checkversion.php?version="+TV_VERSION)
 
 	def treesel(self, selection, model):
 		"""Called when selection changes, changes the enabled toolbar buttons."""
@@ -864,7 +866,7 @@ class TunesViewer:
 		if event.button == 3:
 			x = int(event.x)
 			y = int(event.y)
-			time = event.time
+			moment = event.time
 			pthinfo = treeview.get_path_at_pos(x, y)
 			if pthinfo is not None:
 				path, col, cellx, celly = pthinfo
@@ -872,7 +874,7 @@ class TunesViewer:
 				treeview.set_cursor(path, col, 0)
 				# Right click menu
 				self.rcmenu.popup(None, None, None,
-						  event.button, time)
+						  event.button, moment)
 			return True
 
 	def tabChange(self, obj1, obj2, i):
@@ -884,12 +886,12 @@ class TunesViewer:
 
 	def bugReport(self, obj):
 		logging.debug("Opening bug")
-		openDefault("http://sourceforge.net/tracker/?group_id=305696&atid=1288143")
+		openDefault(BUG_URL)
 
 
 	def showHelp(self, obj):
 		logging.debug("Opening Help")
-		openDefault("/usr/share/tunesviewer/help.txt")
+		openDefault(HELP_URL)
 
 
 	def showAbout(self, obj):
@@ -898,7 +900,13 @@ class TunesViewer:
 					gtk.MESSAGE_INFO,
 					gtk.BUTTONS_CLOSE,
 					"TunesViewer - Easy iTunesU access\n"
-					"Version %s, (c) 2009-2012, Tunesviewer authors.\n"
+					"Version %s\n\n"
+					"(C) 2009 - 2012 Luke Bryan\n"
+					"2011 - 2012 Rogério Theodoro de Brito\n"
+					"and other contributors.\n"
+					"Icon based on Michał Rzeszutek's openclipart hat.\n"
+					"Loading-throbber based on Firefox icon.\n"
+					"PyGTK Webkit interface and inspector code (C) 2008 Jan Alonzo.\n"
 					"This is open source software, distributed 'as is'." % (TV_VERSION,))
 		msg.run()
 		msg.destroy()
@@ -1295,6 +1303,8 @@ class TunesViewer:
 			url = ""
 			for key in keys:
 				print key.text, key.getnext().text
+				if key.text == "navbar":
+					return
 				if key.text == "URL" and key.getnext() is not None:
 					url = key.getnext().text
 				elif key.text == "artistName" and key.getnext() is not None:
@@ -1303,6 +1313,8 @@ class TunesViewer:
 					extType = "."+key.getnext().text
 				elif key.text == "songName" and key.getnext() is not None:
 					name = key.getnext().text
+			if extType==".rtf":
+				extType = ".zip"
 			self.downloadFile(name, artist, duration, extType, comment, url)
 			return
 		elif url.startswith("copyurl://"):
@@ -1373,7 +1385,7 @@ class TunesViewer:
 			#Downloader:
 			response = opener.open(url)
 			pageType = response.info().getheader('Content-Type', 'noheader?')
-			if pageType.startswith("text"):
+			if pageType.startswith("text") or pageType=='noheader?': #(noheader on subscribe sometimes)
 				next = response.read(100)
 				while next != "" and self.downloading:
 					text += next
@@ -1535,18 +1547,21 @@ class TunesViewer:
 
 	def updateListIcons(self):
 		"""
-		Sets the icons in the liststore based on the media type.
+		Sets the icons in the liststore/bottom panel based on the
+		media type.
 		"""
 		self.icon_audio = None
 		self.icon_video = None
 		self.icon_book = None
+		self.icon_zip = None
 		self.icon_other = None
 		self.icon_link = None
 		try:
 			icon_theme = gtk.icon_theme_get_default() #Access theme's icons:
 			self.icon_audio = icon_theme.load_icon("sound", self.config.iconsizeN, 0)
 			self.icon_video = icon_theme.load_icon("video", self.config.iconsizeN, 0)
-			self.icon_book = icon_theme.load_icon("gnome-mime-application-pdf", self.config.iconsizeN, 0)
+			self.icon_pdf = icon_theme.load_icon("gnome-mime-application-pdf", self.config.iconsizeN, 0)
+			self.icon_zip = icon_theme.load_icon("gnome-mime-application-zip", self.config.iconsizeN, 0)
 			self.icon_other = icon_theme.load_icon("gnome-fs-regular", self.config.iconsizeN, 0)
 			self.icon_link = icon_theme.load_icon("gtk-jump-to-ltr", self.config.iconsizeN, 0)
 		except Exception as e:
@@ -1557,25 +1572,36 @@ class TunesViewer:
 			content_type = row[4].lower()
 
 			self.liststore.set(row.iter, 0,
-				self.iconOfType(content_type))
-			#elif row[8]: #it's a link
-			#	self.liststore.set(row.iter, 0,
-			#			   self.icon_link)
+					   self.iconOfType(content_type))
 
 			url = row[10]
 
-	def iconOfType(self,content_type):
-		audio_types = [".mp3", ".m4a", ".amr", ".m4p", ".aiff", ".aif",
-			       ".aifc"]
-		video_types = [".mp4", ".m4v", ".mov", ".m4b", ".3gp"]
-		book_types = [".pdf", ".epub"]
-		if content_type in audio_types:
-			return self.icon_audio
-		elif content_type in video_types:
-			return self.icon_video
-		elif content_type in book_types:
-			return self.icon_book
-		else:
+	def iconOfType(self, content_type):
+		icon_of_type = {
+			'.aif': self.icon_audio,
+			'.aiff': self.icon_audio,
+			'.amr': self.icon_audio,
+			'.m4a': self.icon_audio,
+			'.m4p': self.icon_audio,
+			'.mp3': self.icon_audio,
+
+			'.3gp': self.icon_video,
+			'.m4b': self.icon_video,
+			'.m4v': self.icon_video,
+			'.mov': self.icon_video,
+			'.mp4': self.icon_video,
+
+			'.pdf': self.icon_pdf,
+
+			'.epub': self.icon_other,
+
+			'.zip': self.icon_zip,
+			}
+
+		try:
+			return icon_of_type[content_type]
+		except KeyError as e:
+			logging.debug("Couldn't find specific icon for type %s" % str(e))
 			return self.icon_other
 
 class VWin:
@@ -1651,7 +1677,11 @@ if __name__ == "__main__":
 	prog.sock = SingleWindowSocket(url, prog)
 
 	if prog.sock.RUN:
-		prog.url = url
-		prog.main()
+		try:
+			prog.url = url
+			prog.main()
+		except KeyboardInterrupt:
+			print "Keyboard Interrupt, exiting."
+			prog.exitclicked(None)
 	else:
 		logging.info("Sending url to already-running window.")
